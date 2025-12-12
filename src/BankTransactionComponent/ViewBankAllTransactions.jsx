@@ -12,7 +12,7 @@ const ViewBankAllTransactions = () => {
 
   const retrieveAllTransactions = async () => {
     const response = await axios.get(
-      "https://bankapi.cloudwitches.online/api/bank/transaction/all/customer/fetch?bankId=" +
+      "https://bankapi.cohort4pod7cloud.online/api/bank/transaction/all/customer/fetch?bankId=" +
         bank.bank.id,
       {
         headers: {
