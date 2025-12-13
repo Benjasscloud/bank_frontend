@@ -73,7 +73,6 @@
 #          git push origin main
 # # 
 
-
 name: Bank Frontend Pipeline
 
 on:
@@ -100,24 +99,17 @@ jobs:
         aws-region: us-east-1
 
     - name: Build Docker image
-      run: |
-        docker build -t bank-frontend:latest .
+      run: docker build -t bank-frontend:latest .
 
-    # 🔑 IMPORTANT: registry is HARD-CODED here (this fixes the 400 error)
+    # ✅ SINGLE-LINE COMMAND (PowerShell-safe)
     - name: Login to Amazon ECR
-      run: |
-        aws ecr get-login-password --region us-east-1 ^
-        | docker login --username AWS --password-stdin 026764164788.dkr.ecr.us-east-1.amazonaws.com
+      run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 026764164788.dkr.ecr.us-east-1.amazonaws.com
 
     - name: Tag Docker image
-      run: |
-        docker tag bank-frontend:latest ^
-        ${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}
+      run: docker tag bank-frontend:latest ${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}
 
     - name: Push image to ECR
-      run: |
-        docker push ^
-        ${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}
+      run: docker push ${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}
 
     - name: Clean up Docker images locally
       run: |
@@ -126,7 +118,7 @@ jobs:
 
     - name: Clean workspace
       run: |
-        rmdir /s /q *
+        Remove-Item -Recurse -Force * -ErrorAction SilentlyContinue
 
   Continues-Update_k8s_manifest:
     runs-on: self-hosted
@@ -138,7 +130,7 @@ jobs:
         GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
         GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
       run: |
-        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Benjasscloud/bank_frontend.git
+        git clone https://${env:GIT_USERNAME}:${env:GIT_PASSWORD}@github.com/Benjasscloud/bank_frontend.git
         cd bank_frontend
 
         git config --global user.email "awsbenjass1@gmail.com"
@@ -149,3 +141,4 @@ jobs:
         git add kubernetes-manifest/bank-project/frontend.yaml
         git commit -m "Update frontend image to version ${{ github.run_number }}"
         git push origin main
+
